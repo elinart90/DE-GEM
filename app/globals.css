@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink:        #0c0d0f;
+  --panel:      #14161a;
+  --panel-2:    #1c2025;
+  --line:       #2a2f37;
+  --steel:      #7d8794;
+  --chrome:     #e8ebef;
+  --amber:      #f5b301;   /* safety amber — primary accent */
+  --amber-dim:  #b88600;
+  --oxide:      #c2502f;   /* oxide red — secondary */
+  --ok:         #3fb950;
+  --warn:       #d29922;
+  --bad:        #e5534b;
+
+  --font-display: 'Saira Condensed', sans-serif;
+  --font-body:    'Saira', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+html, body { background: var(--ink); color: var(--chrome); }
+body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+
+/* Headings use the condensed industrial display face, uppercase, tracked out */
+.t-display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+/* Numeric data — SKUs, stock, prices — get the mono "instrument readout" treatment */
+.t-data { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Subtle hazard-stripe texture for accent strips */
+.hazard {
+  background-image: repeating-linear-gradient(
+    -45deg, var(--amber) 0 10px, var(--ink) 10px 20px
+  );
+}
+
+::selection { background: var(--amber); color: var(--ink); }
+
+/* Scrollbars to match the dark shell */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--ink); }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--steel); }
+
+input, select, textarea {
+  background: var(--ink);
+  border: 1px solid var(--line);
+  color: var(--chrome);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--amber);
+}
