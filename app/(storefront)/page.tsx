@@ -1,23 +1,34 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { listFeatured } from '@/lib/public-queries'
+import { listAllPublicProducts } from '@/lib/public-queries'
 import { listCategories } from '@/lib/queries'
 import type { Product, Category } from '@/lib/types'
 import ProductCard from '@/components/storefront/ProductCard'
 import { ShieldCheck, Truck, Smartphone, ArrowRight, Loader2 } from 'lucide-react'
 
+const PER_SECTION = 4
+
 export default function Home() {
-  const [featured, setFeatured] = useState<Product[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([listFeatured(8), listCategories()])
-      .then(([f, c]) => { setFeatured(f); setCategories(c) })
+    Promise.all([listAllPublicProducts(), listCategories()])
+      .then(([p, c]) => { setProducts(p); setCategories(c) })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  const sections = useMemo(() => {
+    const named = categories
+      .map((c) => ({ cat: c, items: products.filter((p) => p.category_id === c.id) }))
+      .filter((s) => s.items.length > 0)
+    const known = new Set(categories.map((c) => c.id))
+    const orphans = products.filter((p) => !p.category_id || !known.has(p.category_id))
+    return { named, orphans }
+  }, [products, categories])
 
   return (
     <main>
@@ -61,7 +72,7 @@ export default function Home() {
       </section>
 
       <div className="max-w-6xl mx-auto px-4 lg:px-6 py-12">
-        {/* Categories */}
+        {/* Category chips */}
         {categories.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-10">
             {categories.map((c) => (
@@ -73,21 +84,37 @@ export default function Home() {
           </div>
         )}
 
-        {/* Featured */}
-        <div className="flex items-end justify-between mb-5">
-          <h2 className="t-display text-2xl">Latest stock</h2>
-          <Link href="/products" className="text-steel hover:text-amber text-sm flex items-center gap-1">
-            View all <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
+        {/* Products grouped by category */}
         {loading ? (
           <div className="flex items-center gap-2 text-steel text-sm py-16 justify-center"><Loader2 className="w-4 h-4 animate-spin" /> Loading…</div>
-        ) : featured.length === 0 ? (
+        ) : sections.named.length === 0 && sections.orphans.length === 0 ? (
           <div className="text-center py-16 text-steel text-sm">No products yet — check back soon.</div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {featured.map((p) => <ProductCard key={p.id} product={p} />)}
+          <div className="space-y-12">
+            {sections.named.map(({ cat, items }) => (
+              <section key={cat.id}>
+                <div className="flex items-end justify-between mb-4 border-b border-line pb-2">
+                  <h2 className="t-display text-2xl">{cat.name}</h2>
+                  <Link href={`/products?category=${cat.slug}`} className="text-steel hover:text-amber text-sm flex items-center gap-1">
+                    {items.length > PER_SECTION ? `View all ${items.length}` : 'View all'} <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  {items.slice(0, PER_SECTION).map((p) => <ProductCard key={p.id} product={p} />)}
+                </div>
+              </section>
+            ))}
+
+            {sections.orphans.length > 0 && (
+              <section>
+                <div className="flex items-end justify-between mb-4 border-b border-line pb-2">
+                  <h2 className="t-display text-2xl">Other</h2>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  {sections.orphans.slice(0, PER_SECTION).map((p) => <ProductCard key={p.id} product={p} />)}
+                </div>
+              </section>
+            )}
           </div>
         )}
       </div>
