@@ -46,11 +46,11 @@ export default async function Overview() {
 
       <div className="mt-7 bg-panel border border-line rounded-lg p-5">
         <h2 className="t-display text-sm text-amber tracking-widest mb-2">Build status — Phase 1</h2>
-        <p className="text-steel text-sm leading-relaxed">
+        {/* <p className="text-steel text-sm leading-relaxed">
           Admin shell, authentication, and the settings module are live. Next up: product
           and category CRUD so you can load real parts, then the storefront and checkout.
           Don&apos;t build past order fulfilment until one real order has gone through.
-        </p>
+        </p> */}
       </div>
     </div>
   )
